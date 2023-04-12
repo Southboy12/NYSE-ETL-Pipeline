@@ -7,20 +7,32 @@ import glob
 
 
 def extract_data(dataset_url: str) -> pd.DataFrame:
-    """"""
+    """Read daily stock prices into pandas DataFrame"""
     od.download(dataset_url, './data')
     csv_path = Path('./data/nyse-daily-stock-prices')
     files = os.listdir(csv_path)
     #print(len(files))
-    parquet_path = Path('./data/parquet')
     dfs = []
-    for file in files[:5]:
+    for file in files:
         df = pd.read_csv(str(csv_path) + '/' + file)
         dfs.append(df)
     return dfs
-    #df.to_parquet(f"{str(parquet_path)} + {file[:-3]}.parquet")
+
+
+def write_to_local(dfs: pd.DataFrame) -> Path:
+    """Write DataFrame locally as parquet file"""
+    for df in dfs:
+        csv_name = df['ticker'][0]
+        parquet_path = './data/parquet/'
+        df.to_parquet(f"{parquet_path}{csv_name}.parquet", compression='gzip')
+
+
+def write_to_gsc():
+    """Upload local parquet file to GCS"""
 
 
 if __name__ == "__main__":
     dataset_url = 'https://www.kaggle.com/datasets/svaningelgem/nyse-daily-stock-prices'
-    extract_data(dataset_url)
+    dfs = extract_data(dataset_url)
+    path = write_to_local(dfs)
+    write_to_gsc()
