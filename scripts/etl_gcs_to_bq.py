@@ -23,17 +23,30 @@ def transform(path: Path) -> pd.DataFrame:
     """Merge all the files in the folder and clean"""
     df = pd.concat([pd.read_parquet(file) for file in path.glob("*.parquet")])
     print(df.shape)
+
+    # Convert date column from string to date
+    df['date'] = pd.to_datetime(df.date)
+    df['year'] = df.date.dt.year
+    df['month'] = df.date.dt.month_name()
+    df['day'] = df.date.dt.day
+    df.drop(columns=['date'], inplace=True)
+
+    print(df.head())
     return df
 
 
-@task()
+@task(log_prints=True)
 def write_to_bq(df: pd.DataFrame) -> None:
     """Write DataFrame to BigQuery"""
-    GcpCredentials.load('nyse-cred')
-    df.to_gbq(
-        destination_table=
-    )
 
+    gcp_credentials_block = GcpCredentials.load('nyse-cred')
+    df.to_gbq(
+        destination_table="stock_data.ny_table",
+        project_id="sincere-office-375210",
+        credentials=gcp_credentials_block.get_credentials_from_service_account(),
+        chunksize=500_000,
+        if_exists='replace'
+    )
 
 
 @flow
@@ -41,6 +54,7 @@ def etl_gcs_to_bq():
     path = extract_from_gcs()
     df = transform(path)
     write_to_bq(df)
+
 
 if __name__ == "__main__":
     etl_gcs_to_bq()
