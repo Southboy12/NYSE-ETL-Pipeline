@@ -4,7 +4,9 @@ from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_gcp import GcpCredentials
 import glob
-
+from pandasql import sqldf
+import pandasql as ps
+import duckdb
 
 
 @task(log_prints=True, retries=3)
@@ -29,11 +31,9 @@ def transform(path: Path) -> pd.DataFrame:
     df['year'] = df.date.dt.year
     df['month'] = df.date.dt.month_name()
     df['day'] = df.date.dt.day
-    df.drop(columns=['date'], inplace=True)
 
     print(df.head())
     return df
-
 
 @task(log_prints=True)
 def write_to_bq(df: pd.DataFrame) -> None:
@@ -41,7 +41,7 @@ def write_to_bq(df: pd.DataFrame) -> None:
 
     gcp_credentials_block = GcpCredentials.load('nyse-cred')
     df.to_gbq(
-        destination_table="stock_data.ny_table",
+        destination_table="stock_data.nyse_table",
         project_id="sincere-office-375210",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
