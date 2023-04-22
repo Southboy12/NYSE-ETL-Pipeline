@@ -1,7 +1,16 @@
 data
 kaggle.json
 nyse-daily-stock-prices
+<<<<<<< HEAD
 spark
 etl_pipeline.py
 spark_batch
 lib
+=======
+
+# Default .gitignore content added by dbt Cloud
+target/
+dbt_packages/
+logs/
+# end dbt Cloud content
+>>>>>>> 5b6edd86d616553b21c030a4e9bd40f3f507666b

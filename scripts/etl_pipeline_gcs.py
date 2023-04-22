@@ -48,6 +48,7 @@ def write_to_gcs(path: Path, df: pd.DataFrame) -> None:
     gcs_block.upload_from_folder(from_folder="./data/split_parquet", to_folder="./data/split_parquet")
     return
 
+
 @flow()
 def parent_flow():
     dataset_url = 'https://www.kaggle.com/datasets/svaningelgem/nyse-daily-stock-prices'
