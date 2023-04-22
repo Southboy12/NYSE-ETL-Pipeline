@@ -1,3 +1,7 @@
 data
 kaggle.json
 nyse-daily-stock-prices
+spark
+etl_pipeline.py
+spark_batch
+lib
